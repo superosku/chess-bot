@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 #[derive(Clone)]
 struct Board {
     last_move_x: u8,
@@ -48,6 +50,21 @@ impl Board {
                 // [0b1010, 0b1011, 0b1100, 0b1101, 0b1110, 0b1100, 0b1011, 0b1010],
             ],
         }
+    }
+
+    fn hash(&self) -> u64 {
+        let mut val: u64 = 0;
+
+        val = self.last_move_x as u64 + (val << 6) + (val << 16) - val;
+        val = self.last_move_y as u64 + (val << 6) + (val << 16) - val;
+
+        for row in self.values.iter() {
+            for piece in row {
+                val = *piece as u64 + (val << 6) + (val << 16) - val;
+            }
+        }
+
+        val
     }
 
     fn print(&self) {
@@ -313,16 +330,33 @@ impl Board {
         valid_moves
     }
 
-    fn req_play(&self, turn: u8, depth: i8) -> i64 {
-        // self.print();
+    fn req_play(
+        &self, turn: u8, depth: u8, hasher: &mut HashMap<(u64, u8, u8), i64>,
+    ) -> i64 {
         if depth == 0 {
             return 1;
         }
         let mut counter = 0;
         for new_position in self.valid_moves(turn) {
-            // println!("DEPTH {}", depth);
-            // new_position.print();
-            counter += new_position.req_play(if turn == 1 { 0 } else { 1 }, depth - 1)
+            match hasher.get(
+                &(new_position.hash(), turn, depth)
+            ) {
+                Some(x) => {
+                    counter += x;
+                },
+                _ => {
+                    let value = new_position.req_play(
+                        if turn == 1 { 0 } else { 1 },
+                        depth - 1,
+                        hasher,
+                    );
+                    hasher.insert(
+                        (new_position.hash(), turn, depth),
+                        value,
+                    );
+                    counter += value
+                }
+            }
         }
         counter
     }
@@ -330,16 +364,26 @@ impl Board {
 
 fn main() {
     let board = Board::new();
+    println!("Board hash {}", board.hash());
+
+    let mut hasher: HashMap<(u64, u8, u8), i64> = HashMap::new();
+
     for (depth, correct) in [
-        1, 20, 400, 8902, 197281, 4865609, 119060324
+        1,
+        20,
+        400,
+        8902,
+        197281,
+        4865609,
+        119060324
     ].iter().enumerate() {
-        let step_count = board.req_play(0, depth as i8);
+        let step_count = board.req_play(0, depth as u8, &mut hasher);
         println!("Depth: {} Correct: {} Steps: {} Diff: {}", depth, correct, step_count, step_count - correct);
     }
 
-    // board.print();
+    // println!("H {}", board.hash());
     // for bb in board.valid_moves(0) {
-    //     bb.print();
+    //     println!("H {}", bb.hash());
     // }
 
     // board.req_play(0, 2);
