@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::env;
 
 
 #[derive(Clone)]
@@ -83,7 +84,20 @@ impl Board {
         }
     }
 
-    fn from_edwards_notation(input: &String) -> Board {
+    fn from_edwards_notation(input: &String) -> (u8, Board) {
+        // println!("asdf {}", input);
+
+        let input_parts: Vec<&str> = input.split(" ").collect();
+        let board_content_part = input_parts[0].clone();
+
+        // let turn = 0;
+        //
+        // println!("JEJE {}", input_parts[0]);
+        // println!("JEJE {}", input_parts[1]);
+        // println!("JEJE {}", input_parts[2]);
+
+        let turn = if input_parts[1] == "b" { 0 } else { 1 };
+
         let mut board = Board {
             last_move_x: 100,
             last_move_y: 100,
@@ -102,7 +116,7 @@ impl Board {
         let mut y = 0;
         let mut x = 0;
 
-        for char in input.chars() {
+        for char in board_content_part.chars() {
             match char {
                 '/' => {
                     y += 1;
@@ -169,7 +183,7 @@ impl Board {
             // println!("Now at {} {}", x, y);
         }
 
-        board
+        (turn, board)
     }
 
     fn hash(&self) -> u64 {
@@ -284,32 +298,13 @@ impl Board {
     }
 
     fn is_not_under_attack(&self, x: i8, y: i8, turn: u8) -> bool {
-        // if (x == 5 && y == 7) {
-        //     println!("ISNOTUNDERATTACK START")
-        // }
         let enemy_turn = if turn == 0 { 1 } else { 0 };
-        for ((x2, y2, tx, ty), enemy_move) in self.prospective_moves(enemy_turn, true) {
-            // if x == 5 && y == 7 && ty == 7 {
-            //     println!("WTTFF");
-            // }
-            // println!(
-            //     "ASDFG {} {} {} {} {} {} {} {} {}",
-            //     enemy_move.values[7][5],
-            //     x, y,
-            //     enemy_move.holds_piece_of(x, y, turn),
-            //     enemy_move.holds_piece_of(5, 7, turn),
-            //     enemy_move.holds_piece_of(x, y, enemy_turn),
-            //     enemy_move.holds_piece_of(5, 7, enemy_turn),
-            //     turn,
-            //     enemy_turn
-            // );
-            if enemy_move.holds_piece_of(x, y, turn) {
+        for (_, enemy_move) in self.prospective_moves(enemy_turn, true) {
+            // for ((x2, y2, tx, ty), enemy_move) in self.prospective_moves(enemy_turn, true) {
+            if enemy_move.holds_piece_of(x, y, enemy_turn) {
                 return false;
             }
         }
-        // if (x == 5 && y == 7) {
-        //     println!("ISNOTUNDERATTACK DONE")
-        // }
         true
     }
 
@@ -352,7 +347,7 @@ impl Board {
                         let dir = if turn == 0 { 1 as i8 } else { -1 };
                         // Move one
                         let newy = y as i8 + dir;
-                        if (!ignore_some) { // Can't eat forward
+                        if !ignore_some { // Can't eat forward
                             if self.is_in_board(x as i8, newy) &&
                                 self.is_free(x as i8, newy)
                             {
@@ -462,13 +457,13 @@ impl Board {
                                 && self.is_not_under_attack(5, y as i8, turn)
                                 && self.is_not_under_attack(6, y as i8, turn)
                             {
-                                println!("CASTLING 2: {} {} {} {} {}",
-                                         x,
-                                         y,
-                                         self.is_not_under_attack(4, y as i8, turn),
-                                         self.is_not_under_attack(5, y as i8, turn),
-                                         self.is_not_under_attack(6, y as i8, turn)
-                                );
+                                // println!("CASTLING 2: {} {} {} {} {}",
+                                //          x,
+                                //          y,
+                                //          self.is_not_under_attack(4, y as i8, turn),
+                                //          self.is_not_under_attack(5, y as i8, turn),
+                                //          self.is_not_under_attack(6, y as i8, turn)
+                                // );
                                 let move_prospect = self
                                     .do_move(4, y, 6, y)
                                     .do_move(7, y, 5, y);
@@ -589,7 +584,7 @@ impl Board {
                         print_perf_at,
                     );
                     if depth == print_perf_at {
-                        println!("{}: {}", parse_info(info), value);
+                        println!("{} {}", parse_info(info), value);
                     }
                     hasher.insert(
                         (new_position.hash(), turn, depth),
@@ -604,193 +599,61 @@ impl Board {
 }
 
 fn main() {
-    // let board = Board::from_edwards_notation(
-    //     // &String::from("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R")
-    //     //     &String::from("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/3RK2R")
-    //             &String::from("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q2/PPPBBPpP/3RK2R")
-    // );
-    // let mut hasher: HashMap<(u64, u8, u8), i64> = HashMap::new();
-    // let step_count = board.req_play(1, 1 as u8, &mut hasher, 1);
-    // println!("perf result {}", step_count);
-
-    // let board = Board::new();
-    // board.print();
-    // let mut hasher: HashMap<(u64, u8, u8), i64> = HashMap::new();
-    // let value = board.req_play(0, 1, &mut hasher);
-    // println!("value is {}", value);
-
-
-    let board = Board::from_edwards_notation(
-        &String::from("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q2/PPPBBPpP/3RK2R")
-    );
-
-    println!("");
-    println!("Perf 0:");
-    board.print();
-
-    for (depth, correct) in [
-        1,
-        42,
-    ].iter().enumerate() {
+    let args: Vec<String> = env::args().collect();
+    if args.len() == 3 {
         let mut hasher: HashMap<(u64, u8, u8), i64> = HashMap::new();
-        let step_count = board.req_play(1, depth as u8, &mut hasher, 100);
-        println!("Depth: {} Correct: {} Steps: {} Diff: {}", depth, correct, step_count, step_count - correct);
+
+        let depth = args[1].parse::<u8>().unwrap();
+        let edwards_string = args[2].clone();
+
+        let (turn, board) = Board::from_edwards_notation(&edwards_string);
+
+        let total_moves = board.req_play(turn, depth, &mut hasher, depth);
+
+        println!("");
+        println!("{}", total_moves);
+    } else {
+        for (en, moves) in [
+            (
+                "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+                Vec::from([1, 20, 400, 8902, 197281])
+            ),
+            (
+                "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -",
+                Vec::from([1, 48, 2039, 97862])
+            ),
+            (
+                "8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - -",
+                Vec::from([1, 14, 191, 2812, 43238])
+            ),
+            (
+                "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1",
+                Vec::from([1, 6, 264, 9467])
+            ),
+            (
+                "r2q1rk1/pP1p2pp/Q4n2/bbp1p3/Np6/1B3NBn/pPPP1PPP/R3K2R b KQ - 0 1",
+                Vec::from([1, 6, 264, 9467])
+            ),
+            (
+                "rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8",
+                Vec::from([1, 44, 1486, 62379])
+            ),
+            (
+                "r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10",
+                Vec::from([1, 46, 2079, 89890])
+            ),
+        ].iter() {
+            let (turn, board) = Board::from_edwards_notation(&String::from(*en));
+            for (depth, correct) in moves.iter().enumerate() {
+                let mut hasher: HashMap<(u64, u8, u8), i64> = HashMap::new();
+                let step_count = board.req_play(turn, depth as u8, &mut hasher, 100);
+                println!("Depth: {} Correct: {} Steps: {} Diff: {}", depth, correct, step_count, step_count - correct);
+            }
+        }
     }
 
-
-    let board = Board::from_edwards_notation(
-        &String::from("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR")
-    );
-
-    println!("");
-    println!("Perf 1:");
-    board.print();
-
-    for (depth, correct) in [
-        1,
-        20,
-        400,
-        8902,
-        197281,
-        // 4865609,
-        // 119060324,
-        // 3195901860,
-    ].iter().enumerate() {
-        let mut hasher: HashMap<(u64, u8, u8), i64> = HashMap::new();
-        let step_count = board.req_play(1, depth as u8, &mut hasher, 100);
-        println!("Depth: {} Correct: {} Steps: {} Diff: {}", depth, correct, step_count, step_count - correct);
+    if false {
+        let b = Board::new();
+        b.print();
     }
-
-    let board = Board::from_edwards_notation(
-        &String::from("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R")
-    );
-
-    println!("");
-    println!("Perf 2:");
-    board.print();
-
-    for (depth, correct) in [
-        1,
-        48,
-        2039,
-        97862,
-        // 4085603,
-        // 193690690,
-        // 8031647685,
-    ].iter().enumerate() {
-        let mut hasher: HashMap<(u64, u8, u8), i64> = HashMap::new();
-        let step_count = board.req_play(1, depth as u8, &mut hasher, 100);
-        println!("Depth: {} Correct: {} Steps: {} Diff: {}", depth, correct, step_count, step_count - correct);
-    }
-
-
-    let board = Board::from_edwards_notation(
-        &String::from("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8")
-    );
-
-    println!("");
-    println!("Perf 3:");
-    board.print();
-
-    for (depth, correct) in [
-        1,
-        14,
-        191,
-        2812,
-        43238,
-        674624,
-        // 11030083,
-        // 178633661,
-        // 3009794393,
-    ].iter().enumerate() {
-        let mut hasher: HashMap<(u64, u8, u8), i64> = HashMap::new();
-        let step_count = board.req_play(1, depth as u8, &mut hasher, 100);
-        println!("Depth: {} Correct: {} Steps: {} Diff: {}", depth, correct, step_count, step_count - correct);
-    }
-
-    let board = Board::from_edwards_notation(
-        &String::from("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1")
-    );
-
-    println!("");
-    println!("Perf 4:");
-    board.print();
-
-    for (depth, correct) in [
-        1,
-        6,
-        264,
-        9467,
-        422333,
-        // 15833292,
-        // 706045033,
-    ].iter().enumerate() {
-        let mut hasher: HashMap<(u64, u8, u8), i64> = HashMap::new();
-        let step_count = board.req_play(1, depth as u8, &mut hasher, 100);
-        println!("Depth: {} Correct: {} Steps: {} Diff: {}", depth, correct, step_count, step_count - correct);
-    }
-
-    let board = Board::from_edwards_notation(
-        &String::from("rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R")
-    );
-
-    println!("");
-    println!("Perf 5:");
-    board.print();
-
-    for (depth, correct) in [
-        1,
-        44,
-        1486,
-        62379,
-        // 2103487,
-        // 89941194,
-    ].iter().enumerate() {
-        let mut hasher: HashMap<(u64, u8, u8), i64> = HashMap::new();
-        let step_count = board.req_play(1, depth as u8, &mut hasher, 100);
-        println!("Depth: {} Correct: {} Steps: {} Diff: {}", depth, correct, step_count, step_count - correct);
-    }
-
-    let board = Board::from_edwards_notation(
-        &String::from("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1")
-    );
-
-    println!("");
-    println!("Perf 6:");
-    board.print();
-
-    for (depth, correct) in [
-        1,
-        46,
-        2079,
-        89890,
-        3894594,
-        // 164075551,
-        // 6923051137,
-    ].iter().enumerate() {
-        let mut hasher: HashMap<(u64, u8, u8), i64> = HashMap::new();
-        let step_count = board.req_play(1, depth as u8, &mut hasher, 100);
-        println!("Depth: {} Correct: {} Steps: {} Diff: {}", depth, correct, step_count, step_count - correct);
-    }
-
-    // println!("H {}", board.hash());
-    // for bb in board.valid_moves(0) {
-    //     println!("H {}", bb.hash());
-    // }
-
-    // board.req_play(0, 2);
-
-    // println!("**********************");
-    // println!("* Moves for 0:");
-    // println!("**********************");
-    // for new_position in board.valid_moves(0) {
-    //     new_position.print();
-    // }
-    // println!("**********************");
-    // println!("* Moves for 1:");
-    // println!("**********************");
-    // for new_position in board.valid_moves(1) {
-    //     new_position.print();
-    // }
-    let _ = Board::new();
 }
