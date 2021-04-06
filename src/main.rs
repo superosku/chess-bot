@@ -1,10 +1,32 @@
 use std::collections::HashMap;
 
+
 #[derive(Clone)]
 struct Board {
     last_move_x: u8,
     last_move_y: u8,
     values: [[u8; 8]; 8],
+}
+
+fn number_to_letter(number: i8) -> String {
+    String::from(match number {
+        0 => { "a" }
+        1 => { "b" }
+        2 => { "c" }
+        3 => { "d" }
+        4 => { "e" }
+        5 => { "f" }
+        6 => { "g" }
+        7 => { "h" }
+        _ => { "?" }
+    })
+}
+
+fn parse_info(info: (i8, i8, i8, i8)) -> String {
+    let (x, y, tx, ty) = info;
+    let xl = number_to_letter(x);
+    let txl = number_to_letter(tx);
+    return format!("{}{}{}{}", xl, 9 - (y + 1), txl, 9 - (ty + 1));
 }
 
 impl Board {
@@ -21,6 +43,15 @@ impl Board {
                 [0, 0, 0, 0, 0, 0, 0, 0],
                 [0b11001, 0b11001, 0b11001, 0b11001, 0b11001, 0b11001, 0b11001, 0b11001],
                 [0b11010, 0b11011, 0b11100, 0b11101, 0b11110, 0b11100, 0b11011, 0b11010],
+
+                // [0b10010, 0, 0, 0, 0b10110, 0, 0, 0b10010],
+                // [0, 0, 0, 0, 0, 0, 0, 0],
+                // [0, 0, 0, 0, 0, 0, 0, 0],
+                // [0, 0, 0, 0, 0, 0, 0, 0],
+                // [0, 0, 0, 0, 0, 0, 0, 0],
+                // [0, 0, 0, 0, 0, 0, 0, 0],
+                // [0, 0, 0, 0, 0, 0, 0, 0],
+                // [0b11010, 0, 0, 0, 0b11110, 0b11010, 0, 0],
 
                 // [0, 0, 0, 0, 0, 0, 0, 0],
                 // [0, 0b001, 0, 0, 0, 0, 0, 0],
@@ -72,29 +103,68 @@ impl Board {
         let mut x = 0;
 
         for char in input.chars() {
-            match (char) {
-                '/' => {y += 1; x = 0;},
-                '1' => {x += 1;},
-                '2' => {x += 2;},
-                '3' => {x += 3;},
-                '4' => {x += 4;},
-                '5' => {x += 5;},
-                '6' => {x += 6;},
-                '7' => {x += 7;},
-                '8' => {x += 8;},
-                'p' => {board.values[y][x] = if y == 1 { 0b10001 } else { 0b00001 }; x += 1;},
-                'r' => {board.values[y][x] = 0b10010; x += 1;},
-                'n' => {board.values[y][x] = 0b0011; x += 1;},
-                'b' => {board.values[y][x] = 0b0100; x += 1;},
-                'q' => {board.values[y][x] = 0b0101; x += 1;},
-                'k' => {board.values[y][x] = 0b10110; x += 1;},
-                'P' => {board.values[y][x] = if y == 6 { 0b11001 } else { 0b01001 }; x += 1;},
-                'R' => {board.values[y][x] = 0b11010; x += 1;},
-                'N' => {board.values[y][x] = 0b1011; x += 1;},
-                'B' => {board.values[y][x] = 0b1100; x += 1;},
-                'Q' => {board.values[y][x] = 0b1101; x += 1;},
-                'K' => {board.values[y][x] = 0b11110; x += 1;},
-                _ => {println!("BOO")},
+            match char {
+                '/' => {
+                    y += 1;
+                    x = 0;
+                }
+                '1' => { x += 1; }
+                '2' => { x += 2; }
+                '3' => { x += 3; }
+                '4' => { x += 4; }
+                '5' => { x += 5; }
+                '6' => { x += 6; }
+                '7' => { x += 7; }
+                '8' => { x += 8; }
+                'p' => {
+                    board.values[y][x] = if y == 1 { 0b10001 } else { 0b00001 };
+                    x += 1;
+                }
+                'r' => {
+                    board.values[y][x] = 0b10010;
+                    x += 1;
+                }
+                'n' => {
+                    board.values[y][x] = 0b0011;
+                    x += 1;
+                }
+                'b' => {
+                    board.values[y][x] = 0b0100;
+                    x += 1;
+                }
+                'q' => {
+                    board.values[y][x] = 0b0101;
+                    x += 1;
+                }
+                'k' => {
+                    board.values[y][x] = 0b10110;
+                    x += 1;
+                }
+                'P' => {
+                    board.values[y][x] = if y == 6 { 0b11001 } else { 0b01001 };
+                    x += 1;
+                }
+                'R' => {
+                    board.values[y][x] = 0b11010;
+                    x += 1;
+                }
+                'N' => {
+                    board.values[y][x] = 0b1011;
+                    x += 1;
+                }
+                'B' => {
+                    board.values[y][x] = 0b1100;
+                    x += 1;
+                }
+                'Q' => {
+                    board.values[y][x] = 0b1101;
+                    x += 1;
+                }
+                'K' => {
+                    board.values[y][x] = 0b11110;
+                    x += 1;
+                }
+                _ => { println!("BOO") }
             }
             // println!("Now at {} {}", x, y);
         }
@@ -177,6 +247,13 @@ impl Board {
         self.values[y as usize][x as usize] == 0
     }
 
+    fn holds_piece_of(&self, x: i8, y: i8, turn: u8) -> bool {
+        if self.is_free(x, y) {
+            return false;
+        }
+        (self.values[y as usize][x as usize] >> 3 & 1) == turn
+    }
+
     fn is_enemy(&self, x: i8, y: i8, turn: u8) -> bool {
         (self.values[y as usize][x as usize] >> 3 & 1) != turn && !self.is_free(x, y)
     }
@@ -192,21 +269,51 @@ impl Board {
         // false
     }
 
-    fn handle_pawn_promotion(&self, moves: &mut Vec<Board>, x: usize, y: usize, tx: usize, newy: i8, turn: u8) {
+    fn handle_pawn_promotion(&self, moves: &mut Vec<((i8, i8, i8, i8), Board)>, x: usize, y: usize, tx: usize, newy: i8, turn: u8) {
         let move_prospect = self.do_move(x, y, tx, newy as usize);
         if newy == 0 || newy == 7 {
             for promotion_piece in [2, 3, 4, 5].iter() {
-                let right_color_piece = promotion_piece | if turn == 0 {0b1000} else {0b0};
+                let right_color_piece = promotion_piece | if turn == 0 { 0b1000 } else { 0b0 };
                 let mut promotion_move_prospect = move_prospect.clone();
                 promotion_move_prospect.values[newy as usize][tx] = right_color_piece;
-                moves.push(promotion_move_prospect);
+                moves.push(((x as i8, y as i8, tx as i8, newy), promotion_move_prospect));
             }
         } else {
-            moves.push(move_prospect)
+            moves.push(((x as i8, y as i8, tx as i8, newy), move_prospect));
         }
     }
 
-    fn prospective_moves(&self, turn: u8) -> Vec<Board> {
+    fn is_not_under_attack(&self, x: i8, y: i8, turn: u8) -> bool {
+        // if (x == 5 && y == 7) {
+        //     println!("ISNOTUNDERATTACK START")
+        // }
+        let enemy_turn = if turn == 0 { 1 } else { 0 };
+        for ((x2, y2, tx, ty), enemy_move) in self.prospective_moves(enemy_turn, true) {
+            // if x == 5 && y == 7 && ty == 7 {
+            //     println!("WTTFF");
+            // }
+            // println!(
+            //     "ASDFG {} {} {} {} {} {} {} {} {}",
+            //     enemy_move.values[7][5],
+            //     x, y,
+            //     enemy_move.holds_piece_of(x, y, turn),
+            //     enemy_move.holds_piece_of(5, 7, turn),
+            //     enemy_move.holds_piece_of(x, y, enemy_turn),
+            //     enemy_move.holds_piece_of(5, 7, enemy_turn),
+            //     turn,
+            //     enemy_turn
+            // );
+            if enemy_move.holds_piece_of(x, y, turn) {
+                return false;
+            }
+        }
+        // if (x == 5 && y == 7) {
+        //     println!("ISNOTUNDERATTACK DONE")
+        // }
+        true
+    }
+
+    fn prospective_moves(&self, turn: u8, ignore_some: bool) -> Vec<((i8, i8, i8, i8), Board)> {
         let rook_moves = [
             (-1 as i8, 0 as i8),
             (1, 0),
@@ -245,21 +352,40 @@ impl Board {
                         let dir = if turn == 0 { 1 as i8 } else { -1 };
                         // Move one
                         let newy = y as i8 + dir;
-                        if self.is_in_board(x as i8, newy) &&
-                            self.is_free(x as i8, newy)
-                        {
-                            self.handle_pawn_promotion(&mut moves, x, y, x, newy, turn);
+                        if (!ignore_some) { // Can't eat forward
+                            if self.is_in_board(x as i8, newy) &&
+                                self.is_free(x as i8, newy)
+                            {
+                                self.handle_pawn_promotion(&mut moves, x, y, x, newy, turn);
+                            }
                         }
                         // Eat
                         if self.is_in_board(x as i8 + 1, newy) &&
-                            self.is_enemy(x as i8 + 1, newy, turn)
+                            (
+                                self.is_enemy(x as i8 + 1, newy, turn)
+                                    || ignore_some // Needed for castling restriciton checks
+                            )
                         {
                             self.handle_pawn_promotion(&mut moves, x, y, x + 1, newy, turn);
                         }
+                        // if x == 6
+                        //     && y == 6
+                        //     && self.is_in_board(x as i8 - 1, newy)
+                        // {
+                        //     println!("HMHMHM {} {}", self.is_enemy(x as i8 - 1, newy, turn), ignore_some)
+                        // }
                         if self.is_in_board(x as i8 - 1, newy) &&
-                            self.is_enemy(x as i8 - 1, newy, turn)
+                            (
+                                self.is_enemy(x as i8 - 1, newy, turn)
+                                    || ignore_some // Needed for castling restriciton checks
+                            )
                         {
                             self.handle_pawn_promotion(&mut moves, x, y, x - 1, newy, turn);
+                            // println!(
+                            //     "HEHEHEHE {} {}",
+                            //     moves[moves.len() - 1].1.values[newy as usize][x-1],
+                            //     moves[moves.len() - 1].1.values[7][5],
+                            // );
                         }
                         // Move two
                         let ynew = y as i8 + dir * 2;
@@ -269,10 +395,10 @@ impl Board {
                             && piece_unmoved
                         {
                             let mut move_prospect = self.do_move(x, y, x, ynew as usize);
-                            // Store for en passant possibility that moved twice on last move..
+                            //Store for e n passant possibility that moved twice on last move..
                             let thing = 0b100000 | move_prospect.values[ynew as usize][x as usize];
                             move_prospect.values[ynew as usize][x as usize] = thing;
-                            moves.push(move_prospect)
+                            moves.push(((x as i8, y as i8, x as i8, ynew), move_prospect))
                         }
                         // En passant
                         if self.is_in_board(x as i8 + 1, y as i8 + dir)
@@ -281,7 +407,7 @@ impl Board {
                         {
                             let mut move_prospect = self.do_move(x, y, x + 1, (y as i8 + dir) as usize);
                             move_prospect.values[y][x + 1] = 0;
-                            moves.push(move_prospect)
+                            moves.push(((x as i8, y as i8, (x + 1) as i8, ynew), move_prospect))
                         }
                         if self.is_in_board(x as i8 - 1, y as i8 + dir)
                             && self.is_in_board(x as i8, y as i8 + dir)
@@ -290,7 +416,7 @@ impl Board {
                             let mut move_prospect = self.do_move(x, y, x - 1, (y as i8 + dir) as usize);
                             move_prospect.values[y][x - 1] = 0;
                             // move_prospect.print();
-                            moves.push(move_prospect)
+                            moves.push(((x as i8, y as i8, (x - 1) as i8, ynew), move_prospect))
                         }
                     }
                     // King
@@ -304,35 +430,50 @@ impl Board {
                                 self.is_free(newx, newy) || self.is_enemy(newx, newy, turn)
                             ) {
                                 let move_prospect = self.do_move(x, y, newx as usize, newy as usize);
-                                moves.push(move_prospect);
+                                moves.push(((x as i8, y as i8, newx as i8, newy as i8), move_prospect))
                             }
                         }
                         // Castling queen side
-                        if x == 4
-                            && (y == 0 || y == 7)
-                            && self.values[y][x] & 0b10000 != 0
-                            && self.values[y][0] & 0b10000 != 0
-                            && self.is_free(1, y as i8)
-                            && self.is_free(2, y as i8)
-                            && self.is_free(3, y as i8)
-                        {
-                            let move_prospect = self
-                                .do_move(x, y, 2, y)
-                                .do_move(0, y, 3, y);
-                            moves.push(move_prospect);
-                        }
-                        // Castling king side
-                        if x == 4
-                            && (y == 0 || y == 7)
-                            && self.values[y][x] & 0b10000 != 0
-                            && self.values[y][7] & 0b10000 != 0
-                            && self.is_free(6, y as i8)
-                            && self.is_free(5, y as i8)
-                        {
-                            let move_prospect = self
-                                .do_move(x, y, 6, y)
-                                .do_move(7, y, 5, y);
-                            moves.push(move_prospect);
+                        if !ignore_some {
+                            if x == 4
+                                && (y == 0 || y == 7)
+                                && self.values[y][x] & 0b10000 != 0
+                                && self.values[y][0] & 0b10000 != 0
+                                && self.is_free(1, y as i8)
+                                && self.is_free(2, y as i8)
+                                && self.is_free(3, y as i8)
+                                && self.is_not_under_attack(4, y as i8, turn)
+                                && self.is_not_under_attack(3, y as i8, turn)
+                                && self.is_not_under_attack(2, y as i8, turn)
+                            {
+                                let move_prospect = self
+                                    .do_move(4, y, 2, y)
+                                    .do_move(0, y, 3, y);
+                                moves.push(((4 as i8, y as i8, 2 as i8, y as i8), move_prospect))
+                            }
+                            // Castling king side
+                            if x == 4
+                                && (y == 0 || y == 7)
+                                && self.values[y][x] & 0b10000 != 0
+                                && self.values[y][7] & 0b10000 != 0
+                                && self.is_free(6, y as i8)
+                                && self.is_free(5, y as i8)
+                                && self.is_not_under_attack(4, y as i8, turn)
+                                && self.is_not_under_attack(5, y as i8, turn)
+                                && self.is_not_under_attack(6, y as i8, turn)
+                            {
+                                println!("CASTLING 2: {} {} {} {} {}",
+                                         x,
+                                         y,
+                                         self.is_not_under_attack(4, y as i8, turn),
+                                         self.is_not_under_attack(5, y as i8, turn),
+                                         self.is_not_under_attack(6, y as i8, turn)
+                                );
+                                let move_prospect = self
+                                    .do_move(4, y, 6, y)
+                                    .do_move(7, y, 5, y);
+                                moves.push(((4 as i8, y as i8, 6 as i8, y as i8), move_prospect))
+                            }
                         }
                     }
                     // Rook
@@ -345,7 +486,7 @@ impl Board {
                         for (xdir, ydir) in if colorless_piece == 2 { rook_moves.iter() } else if colorless_piece == 4 { bichop_moves.iter() } else { queen_moves.iter() }
                         {
                             let mut multiplier = 1;
-                            while true {
+                            loop {
                                 let newx = x as i8 + xdir * multiplier;
                                 let newy = y as i8 + ydir * multiplier;
                                 if !self.is_in_board(newx, newy) {
@@ -355,7 +496,7 @@ impl Board {
                                 let is_free = self.is_free(newx, newy);
                                 if is_free || is_enemy {
                                     let move_prospect = self.do_move(x, y, newx as usize, newy as usize);
-                                    moves.push(move_prospect);
+                                    moves.push(((x as i8, y as i8, newx as i8, newy as i8), move_prospect));
                                     if is_enemy {
                                         break;
                                     }
@@ -387,7 +528,7 @@ impl Board {
                                 )
                             {
                                 let move_prospect = self.do_move(x, y, newx as usize, newy as usize);
-                                moves.push(move_prospect)
+                                moves.push(((x as i8, y as i8, newx as i8, newy as i8), move_prospect))
                             }
                         }
                     }
@@ -400,7 +541,7 @@ impl Board {
 
     // Checks if the king can be eaten by enemy from this position -> not valid position
     fn is_valid(&self, turn: u8) -> bool {
-        for position in self.prospective_moves(turn) {
+        for (_, position) in self.prospective_moves(turn, true) { // TODO: Kai voi ignoraa täs?
             if !position.has_kings() {
                 return false;
             }
@@ -409,38 +550,47 @@ impl Board {
     }
 
     // Filter out non valid moves from prospective moves
-    fn valid_moves(&self, turn: u8) -> Vec<Board> {
-        let mut valid_moves: Vec<Board> = vec![];
-        for prospect in self.prospective_moves(turn) {
-            // if !prospect.has_kings() {
-            // if prospect.is_valid(turn) {
+    fn valid_moves(&self, turn: u8) -> Vec<((i8, i8, i8, i8), Board)> {
+        let mut valid_moves: Vec<((i8, i8, i8, i8), Board)> = vec![];
+        for (move_info, prospect) in self.prospective_moves(turn, false) {
             if prospect.is_valid(if turn == 1 { 0 } else { 1 }) {
-                valid_moves.push(prospect)
+                valid_moves.push((move_info, prospect))
             }
         }
+        // if valid_moves.len() == 0 {
+        //     println!("No valid moves")
+        // }
         valid_moves
     }
 
     fn req_play(
-        &self, turn: u8, depth: u8, hasher: &mut HashMap<(u64, u8, u8), i64>,
+        &self,
+        turn: u8,
+        depth: u8,
+        hasher: &mut HashMap<(u64, u8, u8), i64>,
+        print_perf_at: u8,
     ) -> i64 {
         if depth == 0 {
             return 1;
         }
         let mut counter = 0;
-        for new_position in self.valid_moves(turn) {
+        for (info, new_position) in self.valid_moves(turn) {
             match hasher.get(
                 &(new_position.hash(), turn, depth)
             ) {
                 Some(x) => {
                     counter += x;
-                },
+                }
                 _ => {
                     let value = new_position.req_play(
                         if turn == 1 { 0 } else { 1 },
                         depth - 1,
                         hasher,
+                        print_perf_at,
                     );
+                    if depth == print_perf_at {
+                        println!("{}: {}", parse_info(info), value);
+                    }
                     hasher.insert(
                         (new_position.hash(), turn, depth),
                         value,
@@ -454,6 +604,40 @@ impl Board {
 }
 
 fn main() {
+    // let board = Board::from_edwards_notation(
+    //     // &String::from("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R")
+    //     //     &String::from("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/3RK2R")
+    //             &String::from("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q2/PPPBBPpP/3RK2R")
+    // );
+    // let mut hasher: HashMap<(u64, u8, u8), i64> = HashMap::new();
+    // let step_count = board.req_play(1, 1 as u8, &mut hasher, 1);
+    // println!("perf result {}", step_count);
+
+    // let board = Board::new();
+    // board.print();
+    // let mut hasher: HashMap<(u64, u8, u8), i64> = HashMap::new();
+    // let value = board.req_play(0, 1, &mut hasher);
+    // println!("value is {}", value);
+
+
+    let board = Board::from_edwards_notation(
+        &String::from("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q2/PPPBBPpP/3RK2R")
+    );
+
+    println!("");
+    println!("Perf 0:");
+    board.print();
+
+    for (depth, correct) in [
+        1,
+        42,
+    ].iter().enumerate() {
+        let mut hasher: HashMap<(u64, u8, u8), i64> = HashMap::new();
+        let step_count = board.req_play(1, depth as u8, &mut hasher, 100);
+        println!("Depth: {} Correct: {} Steps: {} Diff: {}", depth, correct, step_count, step_count - correct);
+    }
+
+
     let board = Board::from_edwards_notation(
         &String::from("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR")
     );
@@ -468,12 +652,12 @@ fn main() {
         400,
         8902,
         197281,
-        4865609,
-        119060324,
+        // 4865609,
+        // 119060324,
         // 3195901860,
     ].iter().enumerate() {
         let mut hasher: HashMap<(u64, u8, u8), i64> = HashMap::new();
-        let step_count = board.req_play(0, depth as u8, &mut hasher);
+        let step_count = board.req_play(1, depth as u8, &mut hasher, 100);
         println!("Depth: {} Correct: {} Steps: {} Diff: {}", depth, correct, step_count, step_count - correct);
     }
 
@@ -490,14 +674,15 @@ fn main() {
         48,
         2039,
         97862,
-        4085603,
-        193690690,
+        // 4085603,
+        // 193690690,
         // 8031647685,
     ].iter().enumerate() {
         let mut hasher: HashMap<(u64, u8, u8), i64> = HashMap::new();
-        let step_count = board.req_play(1, depth as u8, &mut hasher);
+        let step_count = board.req_play(1, depth as u8, &mut hasher, 100);
         println!("Depth: {} Correct: {} Steps: {} Diff: {}", depth, correct, step_count, step_count - correct);
     }
+
 
     let board = Board::from_edwards_notation(
         &String::from("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8")
@@ -514,12 +699,12 @@ fn main() {
         2812,
         43238,
         674624,
-        11030083,
-        178633661,
-        3009794393,
+        // 11030083,
+        // 178633661,
+        // 3009794393,
     ].iter().enumerate() {
         let mut hasher: HashMap<(u64, u8, u8), i64> = HashMap::new();
-        let step_count = board.req_play(1, depth as u8, &mut hasher);
+        let step_count = board.req_play(1, depth as u8, &mut hasher, 100);
         println!("Depth: {} Correct: {} Steps: {} Diff: {}", depth, correct, step_count, step_count - correct);
     }
 
@@ -537,11 +722,54 @@ fn main() {
         264,
         9467,
         422333,
-        15833292,
-        706045033,
+        // 15833292,
+        // 706045033,
     ].iter().enumerate() {
         let mut hasher: HashMap<(u64, u8, u8), i64> = HashMap::new();
-        let step_count = board.req_play(1, depth as u8, &mut hasher);
+        let step_count = board.req_play(1, depth as u8, &mut hasher, 100);
+        println!("Depth: {} Correct: {} Steps: {} Diff: {}", depth, correct, step_count, step_count - correct);
+    }
+
+    let board = Board::from_edwards_notation(
+        &String::from("rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R")
+    );
+
+    println!("");
+    println!("Perf 5:");
+    board.print();
+
+    for (depth, correct) in [
+        1,
+        44,
+        1486,
+        62379,
+        // 2103487,
+        // 89941194,
+    ].iter().enumerate() {
+        let mut hasher: HashMap<(u64, u8, u8), i64> = HashMap::new();
+        let step_count = board.req_play(1, depth as u8, &mut hasher, 100);
+        println!("Depth: {} Correct: {} Steps: {} Diff: {}", depth, correct, step_count, step_count - correct);
+    }
+
+    let board = Board::from_edwards_notation(
+        &String::from("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1")
+    );
+
+    println!("");
+    println!("Perf 6:");
+    board.print();
+
+    for (depth, correct) in [
+        1,
+        46,
+        2079,
+        89890,
+        3894594,
+        // 164075551,
+        // 6923051137,
+    ].iter().enumerate() {
+        let mut hasher: HashMap<(u64, u8, u8), i64> = HashMap::new();
+        let step_count = board.req_play(1, depth as u8, &mut hasher, 100);
         println!("Depth: {} Correct: {} Steps: {} Diff: {}", depth, correct, step_count, step_count - correct);
     }
 
@@ -564,4 +792,5 @@ fn main() {
     // for new_position in board.valid_moves(1) {
     //     new_position.print();
     // }
+    let _ = Board::new();
 }
